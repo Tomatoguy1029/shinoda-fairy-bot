@@ -9,6 +9,8 @@ export function defaultState(groupId: string): GroupState {
 		laundry: null,
 		shopping: [],
 		invalidStreak: 0,
+		lastInvalidAt: null,
+		lastInvalidMsg: null,
 	};
 }
 
@@ -24,6 +26,9 @@ export async function loadState(env: Env, groupId: string): Promise<GroupState> 
 		for (const item of state.shopping) {
 			if (item.nagCount === undefined) item.nagCount = 0;
 		}
+		// 新規追加フィールドのマイグレーション
+		if (state.lastInvalidAt === undefined) state.lastInvalidAt = null;
+		if (state.lastInvalidMsg === undefined) state.lastInvalidMsg = null;
 		return state;
 	} catch {
 		return defaultState(groupId);

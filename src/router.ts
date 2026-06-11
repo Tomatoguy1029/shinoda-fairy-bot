@@ -37,6 +37,8 @@ export function routeText(state: GroupState, cfg: Config, rawText: string, nowMs
 	const t = rawText.normalize('NFKC').trim();
 	const valid = (msgs: LineMessage[]): LineMessage[] => {
 		state.invalidStreak = 0;
+		state.lastInvalidAt = null;
+		state.lastInvalidMsg = null;
 		return msgs;
 	};
 
@@ -90,14 +92,28 @@ export function routeText(state: GroupState, cfg: Config, rawText: string, nowMs
 	if (nameOnly) return valid(nameOnly);
 
 	// 11. 無効入力（3段階: BASIC → ANGRY → RAGE）
+	// 最後の無効入力から1分以上経っていたらリセット
+	if (state.lastInvalidAt !== null && nowMs - state.lastInvalidAt >= 60 * 1000) {
+		state.invalidStreak = 0;
+		state.lastInvalidMsg = null;
+	}
+
 	state.invalidStreak++;
+	state.lastInvalidAt = nowMs;
+
 	const rageThreshold = cfg.invalidStreakThreshold + 2; // デフォルト: 3 + 2 = 5
+	let selectedMsg = '';
+
 	if (state.invalidStreak >= rageThreshold) {
 		// 妖精崩壊モード: {name} は index.ts 側で発言者の表示名に置換される
-		return [textMsg(pick('INVALID_RAGE'))];
+		selectedMsg = pick('INVALID_RAGE', {}, state.lastInvalidMsg ?? undefined);
+	} else {
+		const angry = state.invalidStreak >= cfg.invalidStreakThreshold || Math.random() < cfg.invalidRandomRate;
+		selectedMsg = pick(angry ? 'INVALID_ANGRY' : 'INVALID_BASIC', {}, state.lastInvalidMsg ?? undefined);
 	}
-	const angry = state.invalidStreak >= cfg.invalidStreakThreshold || Math.random() < cfg.invalidRandomRate;
-	return [textMsg(pick(angry ? 'INVALID_ANGRY' : 'INVALID_BASIC'))];
+
+	state.lastInvalidMsg = selectedMsg;
+	return [textMsg(selectedMsg)];
 }
 
 /** postback (shopping_day?id=...&day=today|tomorrow) */

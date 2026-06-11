@@ -420,11 +420,15 @@ function fillVars(text: string, vars: MessageVars): string {
 	return result;
 }
 
-/** プールから一様ランダムに選び、プレースホルダを埋める */
-export function pick(id: SituationId, vars: MessageVars = {}): string {
+/** プールから一様ランダムに選び、プレースホルダを埋める。excludeTextが指定された場合、同じテキストを避ける */
+export function pick(id: SituationId, vars: MessageVars = {}, excludeText?: string): string {
 	const pool = pools[id];
-	const text = pool[Math.floor(Math.random() * pool.length)];
-	return fillVars(text, vars);
+	let candidates = pool.map((text) => fillVars(text, vars));
+	if (excludeText !== undefined && candidates.length > 1) {
+		const filtered = candidates.filter((c) => c !== excludeText);
+		if (filtered.length > 0) candidates = filtered;
+	}
+	return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
 /**
@@ -434,7 +438,7 @@ export function pick(id: SituationId, vars: MessageVars = {}): string {
  *   2〜3回目   → annoyed(イラつき)
  *   4回目以降  → furious(ブチギレ)
  */
-export function pickNag(id: NagId, nagCount: number, vars: MessageVars = {}): string {
+export function pickNag(id: NagId, nagCount: number, vars: MessageVars = {}, excludeText?: string): string {
 	const pool = nagPools[id];
 	let level: string[];
 	if (nagCount <= 1) {
@@ -444,6 +448,10 @@ export function pickNag(id: NagId, nagCount: number, vars: MessageVars = {}): st
 	} else {
 		level = pool.furious;
 	}
-	const text = level[Math.floor(Math.random() * level.length)];
-	return fillVars(text, vars);
+	let candidates = level.map((text) => fillVars(text, vars));
+	if (excludeText !== undefined && candidates.length > 1) {
+		const filtered = candidates.filter((c) => c !== excludeText);
+		if (filtered.length > 0) candidates = filtered;
+	}
+	return candidates[Math.floor(Math.random() * candidates.length)];
 }

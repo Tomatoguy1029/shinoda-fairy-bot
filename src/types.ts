@@ -46,6 +46,8 @@ export interface GroupState {
 	laundry: LaundryState | null;
 	shopping: ShoppingItem[];
 	invalidStreak: number;
+	lastInvalidAt: number | null; // 最後の無効入力の時刻 (epoch ms)
+	lastInvalidMsg: string | null; // 直前に送信した無効入力メッセージ
 }
 
 // ---- LINE message objects (必要分のみ) ----
