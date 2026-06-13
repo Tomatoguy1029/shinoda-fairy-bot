@@ -11,15 +11,16 @@ export function handleDebug(state: GroupState, cfg: Config, nowMs: number): Line
 	const lines: string[] = ['今の状況を教えてあげるね'];
 
 	// ゴミ出し
+	const gomiNotify = state.gomiEnabled ? 'アナウンスあり🔔' : 'アナウンスオフ🔕';
 	if (ensureGomiToday(state, cfg, nowMs)) {
 		const m = {
 			pending: '今日はゴミの日！まだまとめてないみたいだよ',
 			bundled: '今日はゴミの日！まとめ済み、あとは捨てるだけ',
 			done: '今日はゴミの日だったけど、もう捨て済み。えらい',
 		} as const;
-		lines.push(`【ゴミ出し】${m[state.gomi.status]}`);
+		lines.push(`【ゴミ出し】${m[state.gomi.status]}(${gomiNotify})`);
 	} else {
-		lines.push(`【ゴミ出し】今日はゴミの日じゃないよ(${cfg.gomiDays.map((d) => DOW[d] ?? '?').join('・')}曜日にやるよ)`);
+		lines.push(`【ゴミ出し】今日はゴミの日じゃないよ(${cfg.gomiDays.map((d) => DOW[d] ?? '?').join('・')}曜日にやるよ / ${gomiNotify})`);
 	}
 
 	// 洗濯
