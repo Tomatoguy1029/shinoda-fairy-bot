@@ -2,7 +2,7 @@ import type { Env, LineEvent, LineMessage } from './types';
 import { getConfig } from './config';
 import { pick } from './messages';
 import { getDisplayName, push, reply, textMsg, verifySignature } from './line';
-import { addGroup, getGroups, loadState, removeGroup, saveState } from './state';
+import { addGroup, defaultState, getGroups, loadState, removeGroup, saveState } from './state';
 import { routePostback, routeText } from './router';
 import { cronGomi } from './handlers/gomi';
 import { cronLaundry } from './handlers/laundry';
@@ -57,7 +57,10 @@ async function handleEvent(env: Env, event: LineEvent): Promise<void> {
 	if (event.type === 'message') {
 		const text = extractMentionedText(event);
 		if (text === null) return; // メンションなし→無視
-		const state = await loadState(env, id);
+		// 個人チャット(source.type === 'user')は初回登録時gomiEnabled=false
+		const isPersonal = event.source?.type === 'user';
+		const raw = await env.STATE.get(`g:${id}`);
+		const state = raw ? await loadState(env, id) : defaultState(id, !isPersonal);
 		const before = JSON.stringify(state);
 		messages = routeText(state, cfg, text, Date.now());
 		// グループ一覧への登録漏れを自己修復(join前から居た場合など)

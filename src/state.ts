@@ -2,9 +2,10 @@ import type { Env, GroupState } from './types';
 
 const GROUPS_KEY = 'groups';
 
-export function defaultState(groupId: string): GroupState {
+export function defaultState(groupId: string, gomiEnabled = true): GroupState {
 	return {
 		groupId,
+		gomiEnabled,
 		gomi: { date: '', status: 'pending', announced: false, lastPushHour: null, nagCount: 0 },
 		laundry: null,
 		shopping: [],
@@ -29,6 +30,8 @@ export async function loadState(env: Env, groupId: string): Promise<GroupState> 
 		// 新規追加フィールドのマイグレーション
 		if (state.lastInvalidAt === undefined) state.lastInvalidAt = null;
 		if (state.lastInvalidMsg === undefined) state.lastInvalidMsg = null;
+		// gomiEnabledが存在しない既存データのマイグレーション(既存グループはtrue維持)
+		if ((state.gomiEnabled as boolean | undefined) === undefined) state.gomiEnabled = true;
 		return state;
 	} catch {
 		return defaultState(groupId);

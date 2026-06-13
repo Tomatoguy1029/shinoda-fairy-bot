@@ -31,6 +31,7 @@ export function handleGomiDone(state: GroupState, cfg: Config, nowMs: number): s
 
 /** Cron: 設計書§5.1 */
 export function cronGomi(state: GroupState, cfg: Config, nowMs: number): string[] {
+	if (!state.gomiEnabled) return [];
 	if (!ensureGomiToday(state, cfg, nowMs)) return [];
 	if (state.gomi.status === 'done') return [];
 	const h = jstHour(nowMs);

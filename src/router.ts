@@ -18,6 +18,8 @@ import { handleDebug } from './handlers/debug';
 const RE_GREETING = /^(こんにちは|こんにちわ|おはよう|おはようございます|こんばんは|やあ|ども|どうも|はじめまして|よろしく|ヨロシク)[\s！!]*$/i;
 const RE_HELP = /^(help|ヘルプ|へるぷ)$/i;
 const RE_DEBUG = /^(debug|デバッグ|でばっぐ)$/i;
+const RE_GOMI_ON = /^ゴミ通知(オン|on|ON)$/i;
+const RE_GOMI_OFF = /^ゴミ通知(オフ|off|OFF)$/i;
 const RE_CANCEL = /キャンセル|やめる|やめた|取り消し|取消|削除|消して/;
 const RE_TODAY = /今日|きょう/;
 const RE_TOMORROW = /明日|あした|あす/;
@@ -47,6 +49,16 @@ export function routeText(state: GroupState, cfg: Config, rawText: string, nowMs
 
 	// 1. ヘルプ
 	if (RE_HELP.test(t)) return valid([textMsg(pick('HELP'))]);
+
+	// 1.4. ゴミ通知オン/オフ
+	if (RE_GOMI_ON.test(t)) {
+		state.gomiEnabled = true;
+		return valid([textMsg('ゴミ捨てのアナウンスをオンにしました✅')]);
+	}
+	if (RE_GOMI_OFF.test(t)) {
+		state.gomiEnabled = false;
+		return valid([textMsg('ゴミ捨てのアナウンスをオフにしました🔕')]);
+	}
 
 	// 1.5. デバッグ(登録状況の確認+削除ボタン)
 	if (RE_DEBUG.test(t)) return valid([handleDebug(state, cfg, nowMs)]);

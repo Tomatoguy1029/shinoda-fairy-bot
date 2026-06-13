@@ -42,6 +42,7 @@ export interface ShoppingItem {
 
 export interface GroupState {
 	groupId: string;
+	gomiEnabled: boolean; // ゴミ捨てアナウンスを送るか(個人チャットはデフォルトfalse)
 	gomi: GomiState;
 	laundry: LaundryState | null;
 	shopping: ShoppingItem[];
